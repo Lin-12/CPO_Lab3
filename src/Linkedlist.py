@@ -85,6 +85,7 @@ def List(root1=None):
     def con(l1, l2):
         return Node(l1, l2)
 
+    # Connect two linked lists
     def mconcat(l1, l2):
         if l1 is None:
             return l2
@@ -125,3 +126,21 @@ def List(root1=None):
         'iterator': iterator,
 
     }
+# Make a infinite list ,this list's elem can be created by def __next__
+class Infinite_List(object):
+
+    def __init__(self, Limit):
+        self.Limit = Limit
+        self.elem = -1
+        self.len = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.elem < self.Limit:
+            self.elem += 1
+            self.len += 1
+            return self.elem
+        raise StopIteration()
+
