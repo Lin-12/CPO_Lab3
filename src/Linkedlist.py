@@ -1,146 +1,177 @@
+from inspect import isfunction
+
 class Node(object):
     def __init__(self, value, next=None):
-        """node constructor"""
         self.value = value
         self.next = next
 
+# Return the length of lst
+def length(lst):
+    if lst is None:
+        return 0
+    else:
+        lst = lst()
+        return 1 + length(lst.next)
 
-def List(root1=None):
-    root = root1
+# Utilize the f to map the LinkList.
+def map(lst, f):
+    if lst is None:
+        return None
+    else:
+        lst = lst()
+        tmp = f(lst.value)
+        lst = lst.next
+        return con(tmp, map(lst, f))
 
-    # return the length of list
-    def length(lst):
-        res = 0
-        while lst is not None:
-            res = res + 1
-            lst = lst.next
-        return res
 
-    # Utilize the f to map the LinkList
-    def map(lst, f):
-        curNode = lst
-        while curNode is not None:
-            curNode.value = f(curNode.value)
-            curNode = curNode.next
-        return lst
-
-    # process structure elements to build a return value by specific functions
-    def reduce(lst, f, initial_state):
-        state = initial_state
-        curNode = lst
-        while curNode is not None:
-            state = f(state, curNode.value)
-            curNode = curNode.next
+#  process structure elements to build a return value by specific functions
+def reduce(lst, f, initial_state):
+    state = initial_state
+    if lst is not None:
+        lst = lst()
+        state = f(state, lst.value)
+        lst = lst.next
+        return reduce(lst, f, state)
+    else:
         return state
 
-    # Make it empty and return None
-    def empty():
-        return None
 
-    # return the first element
-    def head(lst):
-        if lst is None: raise Exception
-        a = lst.value
-        return a
+# Return a empty list.
+def empty():
+    return None
 
-    def head_node(node):
-        assert type(node) is Node
-        return node.value
 
-    # return the last element
+# Connect two linked lists
+def concat(l1, l2):
+    if l1 is None:
+        return l2
+    if l2 is None:
+        return l1
+    tmp = reverse(l1)
+    res = l2
+    while tmp is not None:
+        res = con(tmp.value, res)
+        tmp = tmp.next
+    return res
+
+
+# return the first element
+def head(lst):
+    assert lst is not None
+    lst = lst()
+    assert type(lst) is Node
+    return lst.value
+
+
+# return the last element
+def tail_e(lst):
+    assert lst is not None
+    lst = lst()
+    assert type(lst) is Node
+    if lst.next is not None:
+        lst = lst.next
+        return tail_e(lst)
+    return lst.value
+
+
+# Reverse the linkedlist
+def reverse(lst, e=None):
     def tail(lst):
-        while lst.next is not None:
-            lst = lst.next
-        return lst.value
+        lst = lst()
+        assert type(lst) is Node
+        return lst.next
 
-    def tail_node(node):
-        assert type(node) is Node
-        cur = node.next
-        return cur
+    if lst is None:
+        return e
+    return reverse(tail(lst), Node(head(lst), e))
 
-    def reverse(a, next_=None):
-        if a is None:
-            return next_
-        return reverse(tail_node(a), Node(head_node(a), next_))
 
-    # Make a list to be LinkList
-    def from_list(lst):
-        if len(lst) == 0:
-            root = None
-            return root
-        root = None
-        for elem in reversed(lst):
-            root = Node(elem, root)
-        return root
+# Make a list to be LinkList
+def from_list(lst):
+    res = None
+    if len(lst) == 0:
+        return None
+    for e in reversed(lst):
+        res = con(e, res)
+    return res
 
-    # make LinkList be a list
-    def to_list(root):
-        res = []
-        curNode = root
-        while curNode is not None:
-            res.append(curNode.value)
-            curNode = curNode.next
-        return res
 
-    def con(l1, l2):
-        return Node(l1, l2)
+# make LinkList be a list
+def to_list(lst):
+    res = []
+    if lst:
+        lst = lst()
+    while lst is not None:
+        res.append(lst.value)
+        if lst.next is not None:
+            lst = lst.next()
+        else:
+            lst = None
+    return res
 
-    # Connect two linked lists
-    def mconcat(l1, l2):
-        if l1 is None:
-            return l2
-        a = reverse(l1)
-        b = l2
-        while a is not None:
-            b = con(a.value, b)
-            a = a.next
-        return b
 
-    def iterator(lst):
-        curNode = lst
+def con(head_, tail_):
+    def A():
+        return Node(head_, tail_)
 
-        def A():
-            nonlocal curNode
-            if curNode is None: raise StopIteration
-            elem = curNode.value
-            curNode = curNode.next
-            return elem
+    return A
 
-        return A
+def from_generator(lst, idx):
+    cur = con(None, None)
+    for _ in range(idx + 1):
+        cur = con(next(lst), cur)
+    return cur
 
-    return {
-        'Node': Node,
-        'length': length,
-        'map': map,
-        'reduce': reduce,
-        'empty': empty,
-        'head': head,
-        'head_node': head_node,
-        'tail_node': tail_node,
-        'tail': tail,
-        'reverse': reverse,
-        'to_list': to_list,
-        'from_list': from_list,
-        'con': con,
-        'mconcat': mconcat,
-        'iterator': iterator,
+# Iterative structure.
+def iterator(lst):
+    cur = lst
+    while isfunction(cur):
+        cur = cur()
 
-    }
-# Make a infinite list ,this list's elem can be created by def __next__
-class Infinite_List(object):
+    def A():
+        nonlocal cur
+        if cur is None:
+            raise StopIteration
+        tmp = cur.value
+        if cur.next:
+            cur = cur.next()
+        else:
+            cur = cur.next
+        return tmp
 
-    def __init__(self, Limit):
-        self.Limit = Limit
-        self.elem = -1
-        self.len = 0
+    return A
 
-    def __iter__(self):
-        return self
+# Make a infinite list ,this list's elem can be created by elem +=1
+def infinite_list(Limit):
+    elem = 0
+    lst = None
+    while elem <= Limit:
+        lst = con(elem, lst)
+        elem += 1
+    return lst
 
-    def __next__(self):
-        if self.elem < self.Limit:
-            self.elem += 1
-            self.len += 1
-            return self.elem
-        raise StopIteration()
+# Return no instantiated hofstadter_seq.
+def hofstadter_seq(idx):
+    n = 0
+    res1 = None
+    res2 = None
+    while n < idx:
+        if n == 0:
+            res1 = con(0, res1)
+            res2 = con(1, res2)
+        else:
+            tmp_res1 = res2()
+            for _ in range(n - res1().value - 1):
+                tmp_res1 = tmp_res1.next()
+            tmp_value1 = n - tmp_res1.value
+            tmp_res2 = res1()
+            for _ in range(n - res2().value - 1):
+                tmp_res2 = tmp_res2.next()
+            tmp_value2 = n - tmp_res2.value
+            res1 = con(tmp_value1, res1)
+            res2 = con(tmp_value2, res2)
+        n += 1
+    return res1, res2
+
+
 
