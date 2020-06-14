@@ -115,12 +115,10 @@ def con(head_, tail_):
         return Node(head_, tail_)
 
     return A
-
-def from_generator(lst, idx):
-    cur = con(None, None)
-    for _ in range(idx + 1):
-        cur = con(next(lst), cur)
-    return cur
+# Infinitely generate element
+def from_generator(lst):
+    e = next(lst)
+    return e
 
 # Iterative structure.
 def iterator(lst):
